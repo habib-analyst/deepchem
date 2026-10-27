@@ -56,6 +56,8 @@ def angle_between(vector_i: np.ndarray, vector_j: np.ndarray) -> float:
     # resolve to pi (the antiparallel angle) instead of ~0. See #5211.
     cos_angle = np.clip(np.dot(vector_i_u, vector_j_u), -1.0, 1.0)
     angle = np.arccos(cos_angle)
+    # After the clip, a NaN angle is only possible when an input vector is
+    # itself NaN, e.g. the unit vector of a zero vector.
     if np.isnan(angle):
         if np.allclose(vector_i_u, vector_j_u):
             return 0.0

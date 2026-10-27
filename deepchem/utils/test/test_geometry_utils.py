@@ -83,11 +83,6 @@ class TestGeometryUtils(unittest.TestCase):
 
 
 # Regression test for deepchem/deepchem#5211
-# Append to deepchem/utils/test/test_geometry_utils.py
-
-import numpy as np
-
-from deepchem.utils.geometry_utils import angle_between
 
 
 def test_angle_between_nearly_parallel_float32():

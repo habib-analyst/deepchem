@@ -4,6 +4,7 @@ Tests for splitter objects.
 import os
 import unittest
 import numpy as np
+import pytest
 import deepchem as dc
 from deepchem.data import NumpyDataset
 from deepchem.splits import IndexSplitter
@@ -617,12 +618,6 @@ class TestSplitter(unittest.TestCase):
 
 
 # Regression test for deepchem/deepchem#5159
-# Append to deepchem/splits/tests/test_splitters.py (or the RandomSplitter test class)
-
-import numpy as np
-import pytest
-
-import deepchem as dc
 
 
 def test_random_splitter_rejects_invalid_fractions():

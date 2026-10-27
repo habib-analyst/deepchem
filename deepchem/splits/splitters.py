@@ -42,6 +42,26 @@ class Splitter(object):
     subclass for your application.
     """
 
+    @staticmethod
+    def _validate_split_fractions(frac_train: float, frac_valid: float,
+                                  frac_test: float) -> None:
+        """Check that each split fraction lies in [0, 1].
+
+        Raises
+        ------
+        ValueError
+            If any fraction is outside [0, 1]. NaN is rejected as well,
+            since comparisons with NaN are always False.
+        """
+        for name, frac in (("frac_train", frac_train),
+                           ("frac_valid", frac_valid),
+                           ("frac_test", frac_test)):
+            if not 0 <= frac <= 1:
+                raise ValueError(
+                    f"{name} must be between 0 and 1, got {frac}. "
+                    "frac_train, frac_valid and frac_test must each be a valid "
+                    "fraction.")
+
     def k_fold_split(self,
                      dataset: Dataset,
                      k: int,
@@ -377,13 +397,7 @@ class RandomSplitter(Splitter):
             A tuple of train indices, valid indices, and test indices.
             Each indices is a numpy array.
         """
-        for name, frac in (("frac_train", frac_train), ("frac_valid", frac_valid),
-                           ("frac_test", frac_test)):
-            if not 0 <= frac <= 1:
-                raise ValueError(
-                    f"{name} must be between 0 and 1, got {frac}. "
-                    "frac_train, frac_valid and frac_test must each be a valid "
-                    "fraction.")
+        self._validate_split_fractions(frac_train, frac_valid, frac_test)
         np.testing.assert_almost_equal(frac_train + frac_valid + frac_test, 1.)
         if seed is not None:
             np.random.seed(seed)
@@ -476,6 +490,7 @@ class RandomGroupSplitter(Splitter):
         """
 
         assert len(self.groups) == dataset.X.shape[0]
+        self._validate_split_fractions(frac_train, frac_valid, frac_test)
         np.testing.assert_almost_equal(frac_train + frac_valid + frac_test, 1.)
 
         if seed is not None:
@@ -752,6 +767,7 @@ class SingletaskStratifiedSplitter(Splitter):
         # JSG Assert that split fractions can be written as proper fractions over 10.
         # This can be generalized in the future with some common demoninator determination.
         # This will work for 80/20 train/test or 80/10/10 train/valid/test (most use cases).
+        self._validate_split_fractions(frac_train, frac_valid, frac_test)
         np.testing.assert_equal(frac_train + frac_valid + frac_test, 1.)
         np.testing.assert_equal(
             10 * frac_train + 10 * frac_valid + 10 * frac_test, 10.)
@@ -846,6 +862,7 @@ class IndexSplitter(Splitter):
             A tuple of train indices, valid indices, and test indices.
             Each indices is a numpy array.
         """
+        self._validate_split_fractions(frac_train, frac_valid, frac_test)
         np.testing.assert_almost_equal(frac_train + frac_valid + frac_test, 1.)
         num_datapoints = len(dataset)
         train_cutoff = int(frac_train * num_datapoints)
@@ -1021,6 +1038,7 @@ class MolecularWeightSplitter(Splitter):
         except ModuleNotFoundError:
             raise ImportError("This function requires RDKit to be installed.")
 
+        self._validate_split_fractions(frac_train, frac_valid, frac_test)
         np.testing.assert_almost_equal(frac_train + frac_valid + frac_test, 1.)
         if seed is not None:
             np.random.seed(seed)
@@ -1107,6 +1125,7 @@ class MaxMinSplitter(Splitter):
         except ModuleNotFoundError:
             raise ImportError("This function requires RDKit to be installed.")
 
+        self._validate_split_fractions(frac_train, frac_valid, frac_test)
         np.testing.assert_almost_equal(frac_train + frac_valid + frac_test, 1.)
         if seed is None:
             seed = random.randint(0, 2**30)
@@ -1557,6 +1576,7 @@ class ScaffoldSplitter(Splitter):
             A tuple of train indices, valid indices, and test indices.
             Each indices is a list of integers.
         """
+        self._validate_split_fractions(frac_train, frac_valid, frac_test)
         np.testing.assert_almost_equal(frac_train + frac_valid + frac_test, 1.)
         scaffold_sets = self.generate_scaffolds(dataset)
 
@@ -1688,6 +1708,7 @@ class TimeSplitterPDBbind(Splitter):
         self.years = {}
         for i in range(df.shape[0]):
             self.years[df[0][i]] = int(df[1][i])
+        self._validate_split_fractions(frac_train, frac_valid, frac_test)
         np.testing.assert_almost_equal(frac_train + frac_valid + frac_test, 1.)
         num_datapoints = len(dataset)
         assert len(self.ids) == num_datapoints

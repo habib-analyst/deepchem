@@ -1254,6 +1254,7 @@ class ButinaSplitter(Splitter):
         Tuple[List[int], List[int], List[int]]
             A tuple of train indices, valid indices, and test indices.
         """
+        self._validate_split_fractions(frac_train, frac_valid, frac_test)
         try:
             from rdkit import Chem, DataStructs
             from rdkit.Chem import AllChem
@@ -1417,6 +1418,7 @@ class FingerprintSplitter(Splitter):
         Tuple[List[int], List[int], List[int]]
             A tuple of train indices, valid indices, and test indices.
         """
+        self._validate_split_fractions(frac_train, frac_valid, frac_test)
         try:
             from rdkit import Chem
             from rdkit.Chem import AllChem

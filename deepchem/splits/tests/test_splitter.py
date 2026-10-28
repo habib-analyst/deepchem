@@ -629,3 +629,18 @@ def test_random_splitter_rejects_invalid_fractions():
         splitter.split(dataset, frac_train=-0.1, frac_valid=0.1, frac_test=1.0, seed=42)
     with pytest.raises(ValueError, match="frac_valid"):
         splitter.split(dataset, frac_train=0.8, frac_valid=1.1, frac_test=-0.1, seed=42)
+
+
+def test_shared_validation_covers_other_splitters():
+    """The base-class fraction validation must fire in every splitter
+    that accepts frac_train/frac_valid/frac_test (#5159). IndexSplitter
+    covers the shared path; ButinaSplitter and FingerprintSplitter
+    validate before their RDKit import, so the raise needs no RDKit."""
+    dataset = dc.data.NumpyDataset(np.arange(10))
+    for splitter in (dc.splits.IndexSplitter(), dc.splits.ButinaSplitter(),
+                     dc.splits.FingerprintSplitter()):
+        with pytest.raises(ValueError, match="frac_train"):
+            splitter.split(dataset,
+                           frac_train=-0.1,
+                           frac_valid=0.1,
+                           frac_test=1.0)
